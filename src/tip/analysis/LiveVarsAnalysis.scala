@@ -1,12 +1,11 @@
 package tip.analysis
 
+import tip.ast.AstNodeData.{AstNodeWithDeclaration, DeclarationData}
+import tip.ast.AstOps.AstOp
 import tip.ast._
-import tip.lattices._
-import tip.ast.AstNodeData.DeclarationData
-import tip.solvers._
 import tip.cfg._
-
-import scala.collection.immutable.Set
+import tip.lattices._
+import tip.solvers._
 
 /**
   * Base class for live variables analysis.
@@ -22,18 +21,23 @@ abstract class LiveVarsAnalysis(cfg: IntraproceduralProgramCfg)(implicit declDat
 
   def transfer(n: CfgNode, s: lattice.sublattice.Element): lattice.sublattice.Element =
     n match {
-      case _: CfgFunExitNode => lattice.sublattice.bottom
+      case _: CfgFunExitNode => Set.empty //lattice.sublattice.bottom - type error in IDE
       case r: CfgStmtNode =>
         r.data match {
-          case cond: AExpr => ??? //<--- Complete here
+          //add all vars in condition to live vars
+          case cond: AExpr => s union cond.appearingIds
           case as: AAssignStmt =>
             as.left match {
-              case id: AIdentifier => ??? //<--- Complete here
+              //remove id from right part, add all ids from left part
+              case id: AIdentifier => (s - id.declaration) union as.right.appearingIds
               case _ => ???
             }
-          case varr: AVarStmt => ??? //<--- Complete here
-          case ret: AReturnStmt => ??? //<--- Complete here
-          case out: AOutputStmt => ??? //<--- Complete here
+          //remove all declared vars
+          case varr: AVarStmt => s -- varr.declIds
+          //add all vars in return expression
+          case ret: AReturnStmt => s union ret.exp.appearingIds
+          //add all vars in output expression
+          case out: AOutputStmt => s union out.exp.appearingIds
           case _ => s
         }
       case _ => s

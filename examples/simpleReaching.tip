@@ -1,0 +1,13 @@
+main(){
+   var x,y,z;
+   x = input;
+   y = x/2;
+   x = x-y;
+   z = x-4;
+   x = x/2;
+   z = z-1;
+
+   output x;
+
+   return x;
+}
