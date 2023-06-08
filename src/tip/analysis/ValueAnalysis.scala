@@ -69,10 +69,10 @@ trait ValueAnalysisMisc {
       case r: CfgStmtNode =>
         r.data match {
           // var declarations
-          case varr: AVarStmt => ??? //<--- Complete here
+          case varr: AVarStmt => s ++ varr.declIds.map { it => (it, valuelattice.top) }.toMap
 
           // assignments
-          case AAssignStmt(id: AIdentifier, right, _) => ??? //<--- Complete here
+          case AAssignStmt(id: AIdentifier, right, _) => s.updated(id, eval(right, s))
 
           // all others: like no-ops
           case _ => s
@@ -81,6 +81,77 @@ trait ValueAnalysisMisc {
     }
   }
 }
+
+trait ValueAnalysisTypeSizeMisc {
+
+  implicit val declData: DeclarationData
+
+  val cfg: ProgramCfg
+
+  /**
+   * The lattice of abstract values.
+   */
+  val valuelattice: LatticeWithTypeOps
+
+  /**
+   * Set of declared variables, used by `statelattice`.
+   */
+  val declaredVars: Set[ADeclaration] = cfg.nodes.flatMap(_.declaredVarsAndParams)
+
+  /**
+   * The lattice of abstract states.
+   */
+  val statelattice: MapLattice[ADeclaration, valuelattice.type] = new MapLattice(valuelattice)
+
+  /**
+   * Default implementation of eval.
+   */
+  def eval(exp: AExpr, env: statelattice.Element)(implicit declData: DeclarationData): valuelattice.Element = {
+    import valuelattice._
+    exp match {
+      case id: AIdentifier => env(id)
+      case n: ANumber => typeSize(n.value)
+      case bin: ABinaryOp =>
+        val left = eval(bin.left, env)
+        val right = eval(bin.right, env)
+        bin.operator match {
+          case Eqq => eqq(left, right)
+          case GreatThan => gt(left, right)
+          case Divide => div(left, right)
+          case Minus => minus(left, right)
+          case Plus => plus(left, right)
+          case Times => times(left, right)
+          case _ => ???
+        }
+      case _: AInput => valuelattice.top
+      case _ => ???
+    }
+  }
+
+  /**
+   * Transfer function for state lattice elements.
+   */
+  def localTransfer(n: CfgNode, s: statelattice.Element): statelattice.Element = {
+    NoPointers.assertContainsNode(n.data)
+    NoCalls.assertContainsNode(n.data)
+    NoRecords.assertContainsNode(n.data)
+    n match {
+      case r: CfgStmtNode =>
+        r.data match {
+          // var declarations
+          case varr: AVarStmt => s ++ varr.declIds.map { it => (it, valuelattice.top) }.toMap
+
+          // assignments
+          case AAssignStmt(id: AIdentifier, right, _) => s.updated(id, eval(right, s))
+
+          // all others: like no-ops
+          case _ => s
+        }
+      case _ => s
+    }
+  }
+}
+
 
 /**
   * Common functionality for interprocedural analysis.

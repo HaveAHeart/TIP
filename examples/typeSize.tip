@@ -1,0 +1,10 @@
+main() {
+    var x,a,b;
+    x = 258;
+    a = x-511;
+    b = x-2;
+    x = x-155;
+    output b;
+    return b;
+
+}

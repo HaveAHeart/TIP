@@ -1,18 +1,6 @@
 package tip.lattices
 
-import scala.language.implicitConversions
-
-/**
-  * The interval lattice.
-  */
-object IntervalLattice extends LatticeWithOps {
-
-  /**
-    * The element of the IntervalLattice.
-    * An interval of the form (x, y) ranges from x to y (x < y), x and y included.
-    * The interval (PInf, MInf) is the canonical empty interval, i.e. the bottom element.
-    * The interval (MInf, PInf) is the top element.
-    */
+object IntervalLatticeWithTypes extends LatticeWithOps {
   type Element = (Num, Num)
 
   val FullInterval: Element = (MInf, PInf)
@@ -37,8 +25,8 @@ object IntervalLattice extends LatticeWithOps {
     }
 
   /**
-    * A Num is an int, +infinity, or -infinity.
-    */
+   * A Num is an int, +infinity, or -infinity.
+   */
   sealed trait Num extends Ordered[Num] {
     val numType: TypeSizeLattice.Element
     def compare(that: Num): Int =
@@ -54,27 +42,26 @@ object IntervalLattice extends LatticeWithOps {
 
   case class IntNum(i: Int) extends Num {
     override val numType: TypeSizeLattice.Element = TypeSizeLattice.num(i)
-    override def toString = s"$i of $numType"
+    override def toString = s"($i : ${numType})"
   }
 
   case object PInf extends Num {
     override val numType: TypeSizeLattice.Element = TypeSizeLattice.top
-    override def toString = s"+inf of $numType"
+    override def toString = s"(+inf : ${numType})"
   }
 
   case object MInf extends Num {
     override val numType: TypeSizeLattice.Element = TypeSizeLattice.bottom
-    override def toString = s"-inf of $numType"
+    override def toString = s"(-inf : ${numType})"
   }
 
   /**
-    * Number as interval.
-    */
+   * Number as interval.
+   */
   def num(i: Int): Element = (IntNum(i), IntNum(i))
-
   /**
-    * Abstract binary `+` on intervals.
-    */
+   * Abstract binary `+` on intervals.
+   */
   def plus(a: Element, b: Element): Element = {
     val low = (a._1, b._1) match {
       case (_, MInf) | (MInf, _) => MInf
@@ -90,13 +77,13 @@ object IntervalLattice extends LatticeWithOps {
   }
 
   /**
-    * Abstract binary `-` on intervals.
-    */
+   * Abstract binary `-` on intervals.
+   */
   def minus(a: Element, b: Element): Element = plus(a, inv(b))
 
   /**
-    * Abstract `/` on intervals.
-    */
+   * Abstract `/` on intervals.
+   */
   def div(a: Element, b: Element): Element =
     (a, b) match {
       case ((PInf, _), _) => EmptyInterval
@@ -116,8 +103,8 @@ object IntervalLattice extends LatticeWithOps {
     }
 
   /**
-    * Finds the minimum of the given set of Num values.
-    */
+   * Finds the minimum of the given set of Num values.
+   */
   def min(s: Set[Num]): Num =
     if (s.isEmpty) PInf
     else {
@@ -132,8 +119,8 @@ object IntervalLattice extends LatticeWithOps {
     }
 
   /**
-    * Finds the maximum of the given set of Num values.
-    */
+   * Finds the maximum of the given set of Num values.
+   */
   def max(s: Set[Num]): Num =
     if (s.isEmpty) MInf
     else {
@@ -148,8 +135,8 @@ object IntervalLattice extends LatticeWithOps {
     }
 
   /**
-    * Returns the set of signs of the integers in the given interval.
-    */
+   * Returns the set of signs of the integers in the given interval.
+   */
   private def signs(a: Element): Set[Int] =
     a match {
       case (MInf, PInf) => Set(-1, 0, +1)
@@ -165,8 +152,8 @@ object IntervalLattice extends LatticeWithOps {
     }
 
   /**
-    * Apples the binary operator `op` on the interval `a` and the int `b`.
-    */
+   * Apples the binary operator `op` on the interval `a` and the int `b`.
+   */
   private def opNum(a: Element, b: Int, op: (Int, Int) => Int): Element =
     a match {
       case (PInf, _) => EmptyInterval
@@ -178,8 +165,8 @@ object IntervalLattice extends LatticeWithOps {
     }
 
   /**
-    * Abstract `*` on intervals;
-    */
+   * Abstract `*` on intervals;
+   */
   def times(a: Element, b: Element): Element =
     (a, b) match {
       case ((PInf, _), _) => EmptyInterval
@@ -200,8 +187,8 @@ object IntervalLattice extends LatticeWithOps {
     }
 
   /**
-    * Abstract unary `-` on intervals.
-    */
+   * Abstract unary `-` on intervals.
+   */
   private def inv(b: Element): Element =
     b match {
       case (MInf, PInf) => FullInterval
@@ -215,8 +202,8 @@ object IntervalLattice extends LatticeWithOps {
     }
 
   /**
-    * Abstract `==` on intervals;
-    */
+   * Abstract `==` on intervals;
+   */
   def eqq(a: Element, b: Element): Element =
     (a, b) match {
       case (FullInterval, _) => FullInterval
@@ -231,8 +218,8 @@ object IntervalLattice extends LatticeWithOps {
     }
 
   /**
-    * Abstract `>` on intervals;
-    */
+   * Abstract `>` on intervals;
+   */
   def gt(a: Element, b: Element): Element =
     (a, b) match {
       case (FullInterval, _) => FullInterval
