@@ -87,6 +87,11 @@
 Затем был реализован класс [TypeSizeAnalysis](../src/tip/analysis/TypeSizeAnalysis.scala) и добавлена возможность использования анализа типов
 при помощи флагов `-typeSize wlrw`.
 
-Результат тестировался на нескольких примерах, например, на  [typeSize.tip](../examples/typeSize.tip) и [interval0.tip](../examples/interval0.tip): в результате
-получилось, например, корректно определить тип переменной при изменении её значения (`x = 258; x = x-155;` : `x -> (258 of Int_t, 258 of Int_t) | x -> (103 of Byte_t, 103 of Byte_t)`).
+Результат тестировался на нескольких примерах, например, на  [interval0.tip](../examples/interval0.tip):
+![interval0dot](images/pres5-lab-interval0.png)
+
+и [typeSize.tip](../examples/typeSize.tip):
+![typeSizedot](images/pres5-lab-typeSize.png)
+
+В результате получилось, например, корректно определить тип переменной при изменении её значения (`x = 258; x = x-155;` : `x -> (258 of Int_t, 258 of Int_t) | x -> (103 of Byte_t, 103 of Byte_t)`).
 
