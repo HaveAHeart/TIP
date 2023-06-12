@@ -97,8 +97,7 @@ object TypeSizeLattice extends FlatLattice[typeSizeElement.Value] with LatticeWi
     println(s"called num for $i")
     if (i > Byte.MinValue && i < Byte.MaxValue) Byte_t
     else if (i > Int.MinValue && i < Int.MaxValue) Int_t
-    else if (i > -(Int.MinValue * Int.MinValue) && i < (Int.MaxValue * Int.MaxValue)) BigInt_t
-    else Top
+    else BigInt_t
   }
 
   def plus(a: Element, b: Element): Element = lookup(absPlus, a, b)

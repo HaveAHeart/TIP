@@ -63,7 +63,7 @@ object IntervalLattice extends LatticeWithOps {
   }
 
   case object MInf extends Num {
-    override val numType: TypeSizeLattice.Element = TypeSizeLattice.bottom
+    override val numType: TypeSizeLattice.Element = TypeSizeLattice.top
     override def toString = s"-inf of $numType"
   }
 
